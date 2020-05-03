@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <db:oracle-config name="Oracle_Configuration" host="localhost" port="1521" instance="orcl" user="c##scott" password="tiger" doc:name="Oracle Configuration"/>
+    <flow name="dbbulkinsertFlow1">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/dbbulkinsert" doc:name="HTTP"/>
+        <db:insert config-ref="Oracle_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[insert all
+into employee (EMPNO, FIRSTNAME, LASTNAME, AGE, GENDER, DESIGNATION, SALARY, EMAIL)
+values ('6','fghj','werft','45','fghj','sd','fghj','dfghjk')
+into employee (EMPNO, FIRSTNAME, LASTNAME, AGE, GENDER, DESIGNATION, SALARY, EMAIL)
+values ('7','fghj','werft','45','fghj','sd','fghj','dfghjk')
+into employee (EMPNO, FIRSTNAME, LASTNAME, AGE, GENDER, DESIGNATION, SALARY, EMAIL)
+values ('8','fghj','werft','45','fghj','sd','fghj','dfghjk')
+select * from dual]]></db:parameterized-query>
+        </db:insert>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="dbbulkinsertFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/dbbulkinsert1" doc:name="HTTP"/>
+        <db:bulk-execute config-ref="Oracle_Configuration" doc:name="Database"/>
+        <logger message="inserted" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="dbbulkinsertFlow2">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/dbbulkinsert2" doc:name="HTTP"/>
+        <db:insert config-ref="Oracle_Configuration" bulkMode="true" doc:name="Database">
+            <db:parameterized-query><![CDATA[insert into employee (EMPNO, FIRSTNAME, LASTNAME, AGE, GENDER, DESIGNATION, SALARY, EMAIL)
+values ('6','fghj','werft','45','fghj','sd','fghj','dfghjk');
+insert into employee (EMPNO, FIRSTNAME, LASTNAME, AGE, GENDER, DESIGNATION, SALARY, EMAIL)
+values ('7','fghj','werft','45','fghj','sd','fghj','dfghjk')]]></db:parameterized-query>
+        </db:insert>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
